@@ -1,0 +1,96 @@
+import model.User;
+import service.BankService;
+
+import javax.swing.*;
+import java.awt.event.*;
+import java.util.InputMismatchException;
+
+public class Transfer extends JDialog {
+    private JPanel Transfer;
+    private JButton buttonOK;
+    private JButton buttonCancel;
+    private JTextField mobileField;
+    private JTextField amountField;
+
+    public Transfer(Dashboard parent, User loggedInUser, BankService bankService) {
+        super(parent, "Transfer Money", true);
+        setContentPane(Transfer);
+        this.pack();
+        setLocationRelativeTo(parent);
+        getRootPane().setDefaultButton(buttonOK);
+
+
+        buttonOK.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onOK(parent, loggedInUser, bankService);
+            }
+        });
+
+        buttonCancel.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onCancel();
+            }
+        });
+
+        // call onCancel() when cross is clicked
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                onCancel();
+            }
+        });
+
+        // call onCancel() on ESCAPE
+        Transfer.registerKeyboardAction(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                onCancel();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+
+
+    }
+
+    private void onOK(Dashboard parent, User loggedInUser, BankService bankService) {
+        // add your code here
+        try{
+            String receiverMobile = mobileField.getText().trim();
+            double amount = Double.parseDouble(amountField.getText());
+            if(receiverMobile.isBlank() || amountField.getText().isBlank()) {
+                JOptionPane.showMessageDialog(this,
+                        "Please enter receiver's mobile number or amount",
+                        "Empty fields",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            if(amount <= 0){
+                JOptionPane.showMessageDialog(this,
+                        "Please enter amount greater than 0",
+                        "Invalid amount",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            double updatedBalance = bankService.transfer(receiverMobile, amount);
+            parent.refreshDashboardData(updatedBalance);
+            JOptionPane.showMessageDialog(this,
+                    "₱" + String.format("%.2f ", amount) +
+                            "Successfully transferred to " + receiverMobile);
+            dispose();
+        } catch(InputMismatchException | NumberFormatException e){
+            JOptionPane.showMessageDialog(this,
+                    "Please enter valid mobile number/amount.",
+                    "Invalid input",
+                    JOptionPane.ERROR_MESSAGE);
+        }catch(IllegalArgumentException | IllegalStateException e){
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "Transaction Denied",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+
+    }
+
+    private void onCancel() {
+        // add your code here if necessary
+        dispose();
+    }
+}

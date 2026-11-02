@@ -26,8 +26,18 @@ public class Dashboard extends JFrame {
         setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        welcomeText.setText(welcomeText.getText() + " " + loggedInUser.getFullName());
-        balanceText.setText(loggedInUser.currentBalance());
+        try {
+            if(bankService.isLoggedIn()){
+                welcomeText.setText(welcomeText.getText() + " " + loggedInUser.getFullName());
+                balanceText.setText(loggedInUser.currentBalance());
+            }
+        }catch(IllegalStateException e){
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "Unathorized Access",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+
 
         cashInMoneyButton.addActionListener(new ActionListener() {
             @Override
@@ -41,7 +51,8 @@ public class Dashboard extends JFrame {
         transferMoneyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                Transfer transferDialog = new Transfer(Dashboard.this, loggedInUser, bankService);
+                transferDialog.setVisible(true);
             }
         });
     }
