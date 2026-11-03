@@ -14,10 +14,9 @@ public class CashIn extends JDialog {
 
     public CashIn(Dashboard parent, User loggedInUser, BankService bankService) {
         super(parent, "Cash-In", true);
-        setSize(300, 200);
-        setLocationRelativeTo(parent);
-        setLayout(new FlowLayout());
         setContentPane(Cashin);
+        this.pack();
+        setLocationRelativeTo(parent);
         getRootPane().setDefaultButton(buttonOK);
 
         buttonOK.addActionListener(new ActionListener() {
@@ -62,18 +61,22 @@ public class CashIn extends JDialog {
             double updatedBalance = bankService.cashIn(amount);
             parent.refreshDashboardData(updatedBalance);
             JOptionPane.showMessageDialog(this,
-                    "₱" + String.format("%.2f ", amount) +  "Successfully added to your account. \n New Balance: ₱" + loggedInUser.getBalance(),
-                    "Success",
+                    "₱" + String.format("%.2f ", amount) +
+                            "Successfully added to your account. \n New Balance: ₱" +
+                            loggedInUser.getBalance(),
+                    "Successful Cash-In",
                     JOptionPane.INFORMATION_MESSAGE);
             dispose();
-
         }catch(InputMismatchException | NumberFormatException e){
             JOptionPane.showMessageDialog(this,
-                    "Please enter numbers only.",
-                    "Format Error",
+                    "Please enter valid amount.",
+                    "Invalid input",
                     JOptionPane.ERROR_MESSAGE);
-        }catch(IllegalArgumentException | IllegalStateException e){
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Transaction Denied", JOptionPane.WARNING_MESSAGE);
+        } catch(IllegalArgumentException | IllegalStateException e){
+            JOptionPane.showMessageDialog(this,
+                    e.getMessage(),
+                    "Transaction Denied",
+                    JOptionPane.WARNING_MESSAGE);
         }
 
     }
