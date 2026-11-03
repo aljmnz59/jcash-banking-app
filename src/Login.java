@@ -5,15 +5,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.InputMismatchException;
 
 public class Login extends JFrame {
     private JTextField mobileNumber;
     private JTextField pin;
     private JButton loginButton;
     private JPanel Login;
-    private CardLayout cardLayout;
 
-    Login(){
+    public Login(){
         BankService bankService = new BankService();
         setTitle("JCash Banking App");
         setContentPane(Login);
@@ -24,35 +24,52 @@ public class Login extends JFrame {
         setResizable(false);
         getRootPane().setDefaultButton(loginButton);
 
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(mobileNumber.getText().isBlank() || pin.getText().isBlank()) {
-                    JOptionPane.showMessageDialog(Login.this, "Please enter your Mobile number or PIN", "Empty", JOptionPane.INFORMATION_MESSAGE);
-                    return;
+            loginButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    login(bankService);
                 }
-                if(bankService.isLockedOut()){
-                    JOptionPane.showMessageDialog(Login.this, "You run out of login attempts. Please contact support.", "Account Locked", JOptionPane.ERROR_MESSAGE);
-                    mobileNumber.setText("");
-                    pin.setText("");
-                    return;
-                }
-                String inputMobile = mobileNumber.getText();
-                int inputPin = Integer.parseInt(pin.getText());
-                User user = bankService.userLogin(inputMobile, inputPin);
-                if(bankService.isLoggedIn()){
-                    new Dashboard(user, bankService);
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(Login.this, "Invalid Mobile Number or PIN");
-                    mobileNumber.setText("");
-                    pin.setText("");
-                }
-            }
-        });
+            });
+
     }
 
-    public static void main(String[] args) {
+    private void login(BankService bankService){
+        try {
+            String inputMobile = mobileNumber.getText().trim();
+            int inputPin = Integer.parseInt(pin.getText().trim());
+            if(inputMobile.isBlank()) {
+                JOptionPane.showMessageDialog(Login.this,
+                        "Please enter your mobile number",
+                        "Empty",
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            if(bankService.isLockedOut()) {
+                JOptionPane.showMessageDialog(Login.this,
+                        "You run out of login attempts. Please contact support.",
+                        "Account Locked", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            User user = bankService.userLogin(inputMobile, inputPin);
+            if(bankService.isLoggedIn()) {
+                new Dashboard(user, bankService);
+                dispose();
+            }
+        }catch(InputMismatchException | NumberFormatException e){
+            JOptionPane.showMessageDialog(this,
+                    "Please enter valid mobile number or PIN.",
+                    "Invalid input",
+                    JOptionPane.ERROR_MESSAGE);
+        }catch(IllegalStateException | IllegalArgumentException loginE){
+            JOptionPane.showMessageDialog(this,
+                    loginE.getMessage(),
+                    "Security Alert",
+                    JOptionPane.WARNING_MESSAGE);
+        }
+
+    }
+
+    static void main(String[] args) {
         new Login();
     }
 }

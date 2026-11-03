@@ -21,17 +21,13 @@ public class BankService {
         userDatabase.put(user2.getMobileNumber(), user2);
     }
 
-    public User userLogin(String mobileNumber, int pin){
-        if(userAttempts >= MAX_ATTEMPTS) {
-            return null;
-        }
-
+    public User userLogin(String mobileNumber, int pin)throws IllegalArgumentException, IllegalStateException{
+        isLockedOut();
         User user = userDatabase.get(mobileNumber);
 
         if(user == null || user.getPinNumber() != pin) {
             userAttempts++;
-            System.out.println("Mobile number or PIN is incorrect");
-            return null;
+            throw new IllegalArgumentException("Mobile number is incorrect");
         } else {
             userAttempts = 0;
             this.loggedInUser = user;
@@ -39,11 +35,6 @@ public class BankService {
         }
     }
 
-    public void displayBalance(){
-        if(loggedInUser != null){
-            System.out.printf("Your current balance is: ₱%.2f", loggedInUser.getBalance());
-        }
-    }
 
     public double cashIn(double amount)throws IllegalStateException, IllegalArgumentException{
         if(loggedInUser == null){
@@ -61,32 +52,30 @@ public class BankService {
         return calculatedBalance;
     }
 
-    public void transfer(String receiverMobile, double amount){
-        if(loggedInUser == null) return;
-
-        if(!AmountValidation.isPositive(amount)){
-            System.out.println("\nPlease enter valid amount");
-            return;
+    public double transfer(String receiverMobile, double amount)throws IllegalStateException, IllegalArgumentException{
+        if(loggedInUser == null){
+            throw new IllegalStateException("Session expired. Please re-login.");
         }
 
-        if(loggedInUser.getBalance() < amount){
-            System.out.println("\nInsufficient balance");
-            return;
+        if(!AmountValidation.isPositive(amount)){
+            throw new IllegalArgumentException("Please enter amount greater than zero.");
+        }
+
+        if (loggedInUser.getBalance() < amount) {
+            throw new IllegalArgumentException("Insufficient balance.");
         }
 
         User receiver = userDatabase.get(receiverMobile);
 
         if(receiver == null){
-            System.out.println("\nTarget receiver mobile number not found.");
-            return;
+            throw new IllegalStateException("Target receiver mobile number not found.");
         }
 
         if(receiver.getMobileNumber().equals(loggedInUser.getMobileNumber())){
-            System.out.println("\nYou can't transfer money to yourself.");
-            return;
+           throw new IllegalArgumentException("You can't transfer money to yourself.");
         }
 
-        loggedInUser.setBalance(loggedInUser.getBalance() - amount);
+        double calculatedBalance = loggedInUser.setBalance(loggedInUser.getBalance() - amount);
         receiver.setBalance(receiver.getBalance() + amount);
 
         Transaction senderTx = new Transaction("Transfer out", amount, "Sent to " + receiver.getFullName());
@@ -95,8 +84,7 @@ public class BankService {
         loggedInUser.addTransaction(senderTx);
         receiver.addTransaction(receiverTx);
 
-        System.out.printf("\nSuccessfully transfered ₱%.2f to %s.\n", amount, receiver.getFullName());
-        displayBalance();
+        return calculatedBalance;
     }
 
     public void showTransaction(){
@@ -115,11 +103,17 @@ public class BankService {
         System.out.println("\nLogging out. Goodbye " + (loggedInUser != null ? loggedInUser.getFullName() : "") + "!");
     }
 
-    public boolean isLoggedIn(){
+    public boolean isLoggedIn()throws IllegalStateException{
+        if(loggedInUser == null) {
+            throw new IllegalStateException("Session expired. Please re-login.");
+        }
         return loggedInUser != null;
     }
 
-    public boolean isLockedOut() {
-        return userAttempts >= MAX_ATTEMPTS;
+    public boolean isLockedOut()throws IllegalStateException {
+        if(userAttempts >= MAX_ATTEMPTS) {
+            throw new IllegalStateException("This account is temporarily locked.");
+        }
+        return false;
     }
 }
