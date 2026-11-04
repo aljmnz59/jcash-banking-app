@@ -24,7 +24,7 @@ public class Dashboard extends JFrame {
         try {
             if(bankService.isLoggedIn()){
                 welcomeText.setText("Welcome " + loggedInUser.getFullName());
-                balanceText.setText("₱" + loggedInUser.currentBalance());
+                refreshDashboardData(loggedInUser.getBalance());
             }
         }catch(IllegalStateException e){
             JOptionPane.showMessageDialog(this,
