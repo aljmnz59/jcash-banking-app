@@ -99,8 +99,8 @@ public class BankService {
         }
     }
 
-    public void logout(){
-        System.out.println("\nLogging out. Goodbye " + (loggedInUser != null ? loggedInUser.getFullName() : "") + "!");
+    public boolean logout(){
+        return loggedInUser == null;
     }
 
     public boolean isLoggedIn()throws IllegalStateException{
