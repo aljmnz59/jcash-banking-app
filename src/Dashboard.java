@@ -55,6 +55,31 @@ public class Dashboard extends JFrame {
                 transferDialog.setVisible(true);
             }
         });
+
+        checkTransactionsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TransactionHistory transaction = new TransactionHistory();
+                transaction.setVisible(true);
+            }
+        });
+
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int choice = JOptionPane.showConfirmDialog(Dashboard.this,
+                        "Are you sure you want to logout?",
+                        "Confirm Logout",
+                        JOptionPane.YES_NO_OPTION);
+                if(choice == 0){
+                    bankService.logout();
+                    dispose();
+                    new Login();
+                } else {
+                    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+                }
+            }
+        });
     }
 
     public void refreshDashboardData(double newBalance){
