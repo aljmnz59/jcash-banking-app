@@ -25,7 +25,7 @@ public class BankService {
         isLockedOut();
         User user = userDatabase.get(mobileNumber);
 
-        if(user == null || user.getPinNumber() != pin) {
+        if(user == null) {
             userAttempts++;
             throw new IllegalArgumentException("Mobile number is incorrect");
         } else if(user.getPinNumber() != pin){
