@@ -1,58 +1,49 @@
+import model.Transaction;
+
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class TransactionHistory extends JDialog {
-    private JPanel contentPane;
+    private JPanel Transaction;
     private JButton buttonOK;
-    private JButton buttonCancel;
+    private JTable transactionTable;
 
-    public TransactionHistory() {
-        setContentPane(contentPane);
-        setModal(true);
+    public TransactionHistory(Dashboard parent, List<Transaction> transactions) {
+        super(parent, "Transaction History", true);
+        setContentPane(Transaction);
+        setSize(700, 200);
+        setLocationRelativeTo(parent);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
+        String[] headers = {"Date", "Type", "Amount", "Details"};
+
+        DefaultTableModel model = new DefaultTableModel(null, headers){
+            @Override
+            public boolean isCellEditable(int row, int column){
+                return false;
             }
-        });
+        };
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        transactionTable.setModel(model);
 
-        // call onCancel() when cross is clicked
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onCancel();
-            }
-        });
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a");
 
-        // call onCancel() on ESCAPE
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-    }
+        for(Transaction tx : transactions){
+            LocalDateTime rawDateTime = tx.getDateTime();
+            String readableDate = (rawDateTime != null) ? rawDateTime.format(formatter) : "N/A";
+            model.addRow(new Object[]{
+                    readableDate,
+                    tx.getType(),
+                    tx.getAmount(),
+                    tx.getDetails()
+            });
+        }
+        buttonOK.addActionListener(e -> dispose());
 
-    private void onOK() {
-        // add your code here
-        dispose();
-    }
-
-    private void onCancel() {
-        // add your code here if necessary
-        dispose();
-    }
-
-    public static void main(String[] args) {
-        TransactionHistory dialog = new TransactionHistory();
-        dialog.pack();
-        dialog.setVisible(true);
-        System.exit(0);
     }
 }
