@@ -3,8 +3,6 @@ import model.User;
 import service.BankService;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 
 public class Dashboard extends JFrame {
@@ -15,11 +13,8 @@ public class Dashboard extends JFrame {
     private JButton transferMoneyButton;
     private JButton checkTransactionsButton;
     private JButton logoutButton;
-    private BankService bankService;
 
     Dashboard(User loggedInUser, BankService bankService){
-        this.bankService = bankService;
-
         setTitle("Bank Dashboard");
         setContentPane(Dashboard);
         setVisible(true);
@@ -29,7 +24,7 @@ public class Dashboard extends JFrame {
         try {
             if(bankService.isLoggedIn()){
                 welcomeText.setText("Welcome " + loggedInUser.getFullName());
-                balanceText.setText(loggedInUser.currentBalance());
+                balanceText.setText("₱" + loggedInUser.currentBalance());
             }
         }catch(IllegalStateException e){
             JOptionPane.showMessageDialog(this,
@@ -39,58 +34,45 @@ public class Dashboard extends JFrame {
         }
 
 
-        cashInMoneyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                CashIn cashinDialog = new CashIn(Dashboard.this, bankService);
-                cashinDialog.setVisible(true);
+        cashInMoneyButton.addActionListener(_ -> {
+            CashIn cashInDialog = new CashIn(Dashboard.this, bankService);
+            cashInDialog.setVisible(true);
+        });
+
+        transferMoneyButton.addActionListener(_ -> {
+            Transfer transferDialog = new Transfer(Dashboard.this, bankService);
+            transferDialog.setVisible(true);
+        });
+
+        checkTransactionsButton.addActionListener(_ -> {
+            try {
+                List<Transaction> transactions = bankService.showTransaction();
+                TransactionHistory transactionDialog = new TransactionHistory(Dashboard.this, transactions);
+                transactionDialog.setVisible(true);
+            }catch(IllegalArgumentException ex1){
+                JOptionPane.showMessageDialog(
+                        Dashboard.this,
+                        ex1.getMessage(),
+                        "No Data",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }catch(IllegalStateException ex2){
+                JOptionPane.showMessageDialog(
+                        Dashboard.this,
+                        ex2.getMessage(),
+                        "Session Expired. Please relogin",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
-
-        transferMoneyButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Transfer transferDialog = new Transfer(Dashboard.this, bankService);
-                transferDialog.setVisible(true);
-            }
-        });
-
-        checkTransactionsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    List<Transaction> transactions = bankService.showTransaction();
-                    TransactionHistory transactionDialog = new TransactionHistory(Dashboard.this, transactions);
-                    transactionDialog.setVisible(true);
-                }catch(IllegalArgumentException ex1){
-                    JOptionPane.showMessageDialog(
-                            Dashboard.this,
-                            ex1.getMessage(),
-                            "No Data",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }catch(IllegalStateException ex2){
-                    JOptionPane.showMessageDialog(
-                            Dashboard.this,
-                            ex2.getMessage(),
-                            "Session Expired. Please relogin",
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        logoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int choice = JOptionPane.showConfirmDialog(Dashboard.this,
-                        "Are you sure you want to logout?",
-                        "Confirm Logout",
-                        JOptionPane.YES_NO_OPTION);
-                if(choice == JOptionPane.YES_OPTION){
-                    bankService.logout();
-                    dispose();
-                    new Login(bankService).setVisible(true);
-                }
+        logoutButton.addActionListener(_ -> {
+            int choice = JOptionPane.showConfirmDialog(Dashboard.this,
+                    "Are you sure you want to logout?",
+                    "Confirm Logout",
+                    JOptionPane.YES_NO_OPTION);
+            if(choice == JOptionPane.YES_OPTION){
+                bankService.logout();
+                dispose();
+                new Login(bankService).setVisible(true);
             }
         });
     }

@@ -2,9 +2,6 @@ import model.User;
 import service.BankService;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.InputMismatchException;
 
 public class Login extends JFrame {
@@ -12,7 +9,7 @@ public class Login extends JFrame {
     private JTextField pin;
     private JButton loginButton;
     private JPanel Login;
-    private BankService bankService;
+    private final BankService bankService;
 
     public Login(){
         this(new BankService());
@@ -28,12 +25,7 @@ public class Login extends JFrame {
         setResizable(false);
         getRootPane().setDefaultButton(loginButton);
 
-            loginButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    login(bankService);
-                }
-            });
+            loginButton.addActionListener(_ -> login(bankService));
 
     }
 
@@ -74,7 +66,7 @@ public class Login extends JFrame {
 
     }
 
-    static void main(String[] args) {
+    static void main() {
         new Login();
     }
 }

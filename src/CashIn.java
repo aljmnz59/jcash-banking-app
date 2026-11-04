@@ -6,29 +6,21 @@ import java.awt.event.*;
 import java.util.InputMismatchException;
 
 public class CashIn extends JDialog {
-    private JPanel Cashin;
+    private JPanel CashIn;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JTextField cashInAmount;
 
     public CashIn(Dashboard parent, BankService bankService) {
         super(parent, "Cash-In", true);
-        setContentPane(Cashin);
+        setContentPane(CashIn);
         this.pack();
         setLocationRelativeTo(parent);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK(parent, bankService);
-            }
-        });
+        buttonOK.addActionListener(_ -> onOK(parent, bankService));
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        });
+        buttonCancel.addActionListener(_ -> onCancel());
 
         // call onCancel() when cross is clicked
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -39,11 +31,7 @@ public class CashIn extends JDialog {
         });
 
         // call onCancel() on ESCAPE
-        Cashin.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onCancel();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        CashIn.registerKeyboardAction(_ -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK(Dashboard parent, BankService bankService) {
