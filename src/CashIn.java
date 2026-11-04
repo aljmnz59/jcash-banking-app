@@ -1,4 +1,3 @@
-import model.User;
 import service.BankService;
 
 import javax.swing.*;
@@ -12,7 +11,7 @@ public class CashIn extends JDialog {
     private JButton buttonCancel;
     private JTextField cashInAmount;
 
-    public CashIn(Dashboard parent, User loggedInUser, BankService bankService) {
+    public CashIn(Dashboard parent, BankService bankService) {
         super(parent, "Cash-In", true);
         setContentPane(Cashin);
         this.pack();
@@ -21,7 +20,7 @@ public class CashIn extends JDialog {
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onOK(parent, loggedInUser, bankService);
+                onOK(parent, bankService);
             }
         });
 
@@ -47,7 +46,7 @@ public class CashIn extends JDialog {
         }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
-    private void onOK(Dashboard parent, User loggedInUser, BankService bankService) {
+    private void onOK(Dashboard parent, BankService bankService) {
         // add your code here
         try{
             double amount = Double.parseDouble(cashInAmount.getText());
@@ -63,7 +62,7 @@ public class CashIn extends JDialog {
             JOptionPane.showMessageDialog(this,
                     "₱" + String.format("%.2f ", amount) +
                             "Successfully added to your account. \n New Balance: ₱" +
-                            loggedInUser.getBalance(),
+                            String.format("%.2f", updatedBalance),
                     "Successful Cash-In",
                     JOptionPane.INFORMATION_MESSAGE);
             dispose();

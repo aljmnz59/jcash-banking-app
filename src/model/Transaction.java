@@ -31,9 +31,6 @@ public class Transaction {
         return dateTime;
     }
 
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
 
     @Override
     public String toString() {

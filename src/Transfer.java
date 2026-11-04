@@ -1,4 +1,3 @@
-import model.User;
 import service.BankService;
 
 import javax.swing.*;
@@ -12,7 +11,7 @@ public class Transfer extends JDialog {
     private JTextField mobileField;
     private JTextField amountField;
 
-    public Transfer(Dashboard parent, User loggedInUser, BankService bankService) {
+    public Transfer(Dashboard parent, BankService bankService) {
         super(parent, "Transfer Money", true);
         setContentPane(Transfer);
         this.pack();
@@ -22,7 +21,7 @@ public class Transfer extends JDialog {
 
         buttonOK.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                onOK(parent, loggedInUser, bankService);
+                onOK(parent, bankService);
             }
         });
 
@@ -50,18 +49,19 @@ public class Transfer extends JDialog {
 
     }
 
-    private void onOK(Dashboard parent, User loggedInUser, BankService bankService) {
+    private void onOK(Dashboard parent, BankService bankService) {
         // add your code here
         try{
             String receiverMobile = mobileField.getText().trim();
-            double amount = Double.parseDouble(amountField.getText());
-            if(receiverMobile.isBlank() || amountField.getText().isBlank()) {
+            String rawAmount = amountField.getText();
+            if(receiverMobile.isEmpty() || rawAmount.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                        "Please enter receiver's mobile number or amount",
+                        "Please enter both the receiver's mobile number and the amount.",
                         "Empty fields",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            double amount = Double.parseDouble(rawAmount);
             if(amount <= 0){
                 JOptionPane.showMessageDialog(this,
                         "Please enter amount greater than 0",

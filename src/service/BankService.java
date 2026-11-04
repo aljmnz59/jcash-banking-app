@@ -5,6 +5,7 @@ import model.User;
 import util.AmountValidation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BankService {
@@ -78,7 +79,8 @@ public class BankService {
            throw new IllegalArgumentException("You can't transfer money to yourself.");
         }
 
-        double calculatedBalance = loggedInUser.setBalance(loggedInUser.getBalance() - amount);
+        double senderNewBalance = loggedInUser.getBalance() - amount;
+        loggedInUser.setBalance(senderNewBalance);
         receiver.setBalance(receiver.getBalance() + amount);
 
         Transaction senderTx = new Transaction("Transfer out", amount, "Sent to " + receiver.getFullName());
@@ -87,30 +89,29 @@ public class BankService {
         loggedInUser.addTransaction(senderTx);
         receiver.addTransaction(receiverTx);
 
-        return calculatedBalance;
+        return senderNewBalance;
     }
 
-    public void showTransaction(){
-        if(loggedInUser == null) return;
-        System.out.println("\n--- Transaction History ---");
-        if(loggedInUser.getTransactionList().isEmpty()){
-            System.out.println("No transactions found.");
-        } else {
-            for(Transaction tx : loggedInUser.getTransactionList()){
-                System.out.println(tx);
-            }
+    public List<Transaction> showTransaction()throws IllegalArgumentException, IllegalStateException{
+        if(loggedInUser == null){
+            throw new IllegalStateException("Session error.");
         }
+        if(loggedInUser.getTransactionList() == null || loggedInUser.getTransactionList().isEmpty()){
+            throw new IllegalArgumentException("No transactions found.");
+        }
+        return loggedInUser.getTransactionList();
     }
 
     public boolean logout(){
-        return loggedInUser == null;
+        this.loggedInUser = null;
+        return true;
     }
 
     public boolean isLoggedIn()throws IllegalStateException{
         if(loggedInUser == null) {
             throw new IllegalStateException("Session expired. Please re-login.");
         }
-        return loggedInUser != null;
+        return true;
     }
 
     public boolean isLockedOut()throws IllegalStateException {

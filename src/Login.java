@@ -12,9 +12,13 @@ public class Login extends JFrame {
     private JTextField pin;
     private JButton loginButton;
     private JPanel Login;
+    private BankService bankService;
 
     public Login(){
-        BankService bankService = new BankService();
+        this(new BankService());
+    }
+    public Login(BankService existingBankServices){
+        this.bankService = existingBankServices;
         setTitle("JCash Banking App");
         setContentPane(Login);
         setVisible(true);
@@ -52,8 +56,9 @@ public class Login extends JFrame {
             }
             User user = bankService.userLogin(inputMobile, inputPin);
             if(bankService.isLoggedIn()) {
-                new Dashboard(user, bankService);
                 dispose();
+                new Dashboard(user, bankService);
+
             }
         }catch(InputMismatchException | NumberFormatException e){
             JOptionPane.showMessageDialog(this,
