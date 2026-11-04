@@ -28,7 +28,10 @@ public class BankService {
         if(user == null || user.getPinNumber() != pin) {
             userAttempts++;
             throw new IllegalArgumentException("Mobile number is incorrect");
-        } else {
+        } else if(user.getPinNumber() != pin){
+            userAttempts++;
+            throw new IllegalArgumentException("PIN is incorrect");
+        }else {
             userAttempts = 0;
             this.loggedInUser = user;
             return user;
